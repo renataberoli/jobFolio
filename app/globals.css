@@ -29,3 +29,34 @@ th,.offer-link{background:color-mix(in srgb,var(--blue) 14%,var(--white))}
 .field-error,.delete-button{color:var(--rose)}
 dialog{background:var(--white)}dialog::backdrop{background:#45363E69}
 .toast{background:var(--rose);color:var(--white)}
+
+/* Increase text within the applications card by 2px. */
+.applications{font-size:16px}
+.applications .section-heading h2{font-size:17px}
+.applications .section-heading h2 span{font-size:12px}
+.applications .section-heading p{font-size:13px}
+.applications .sort-label{font-size:12px}
+.applications .tab{font-size:13px}
+.applications .search input{font-size:12px}
+.applications .tiny-label{font-size:10px}
+.applications .empty h3{font-size:25px}
+.applications .empty p{font-size:13px}
+.applications .primary,.applications .secondary{font-size:14px}
+.applications .empty .primary{font-size:13px}
+.applications .empty-footnote{font-size:11px}
+.applications th{font-size:10px}
+.applications td{font-size:13px}
+.applications .role-button strong{font-size:14px}
+.applications .role-button small{font-size:12px}
+.applications .company-icon{font-size:21px}
+.applications .status{font-size:12px}
+.applications .document-links a{font-size:12px}
+.applications .error{font-size:14px}
+@media(max-width:760px){
+ .applications .sort-label{font-size:11px}
+ .applications .tab{font-size:12px}
+ .applications .search input{font-size:13px}
+ .applications .empty h3{font-size:24px}
+ .applications .empty p{font-size:12px}
+ .applications .empty-footnote{font-size:10px}
+}
