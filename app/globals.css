@@ -60,3 +60,5 @@ dialog{background:var(--white)}dialog::backdrop{background:#45363E69}
  .applications .empty p{font-size:12px}
  .applications .empty-footnote{font-size:10px}
 }
+
+.row-actions{display:flex;gap:4px}.edit-entry-button{margin-bottom:25px}.existing-document{display:flex;align-items:center;gap:6px;font-size:10px;padding-top:10px;color:var(--muted)}.existing-document span{flex:1;overflow-wrap:anywhere;min-width:0}.existing-document button{background:none;color:var(--rose);font-size:10px;text-decoration:underline}.edit-status{display:block;width:100%;padding:10px 12px;background:var(--white);color:var(--ink);border:1px solid var(--line);border-radius:5px;margin-top:8px;font-size:12px}
