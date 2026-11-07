@@ -30,4 +30,23 @@ export default function Tracker(){
  <dialog ref={detail} onCancel={()=>setSelected(null)} onClick={e=>{if(e.target===e.currentTarget)setSelected(null);}}>{selected&&<><div className="modal-header"><div><div className="eyebrow">{selected.company||"Company not added"}</div><h2>{selected.role||"Untitled application"}</h2></div><button className="icon-button" aria-label="Close application" onClick={()=>setSelected(null)}><X size={20}/></button></div><div className="detail-body"><button className="secondary edit-entry-button" disabled={busy} onClick={()=>openForm(selected)}><Pencil size={14}/> Edit application</button><div className="detail-row"><label>Status</label><select className={"status status-"+selected.status.toLowerCase()} value={selected.status} disabled={busy} onChange={e=>changeStatus(selected,e.target.value)}>{statuses.map(s=><option key={s}>{s}</option>)}</select></div>{selected.url&&<a className="offer-link" href={selected.url} target="_blank" rel="noopener noreferrer"><Link2 size={17}/> View job offer <ArrowUpRight size={17}/></a>}<div className="detail-row"><label>Salary requirement</label><span>{selected.salary||"Not specified"}</span></div><h3>Application documents</h3>{!selected.cvName&&!selected.letterName&&<p className="notes">No documents attached.</p>}{[["cv",selected.cvName],["letter",selected.letterName]].filter(([,name])=>!!name).map(([kind,name])=><a key={kind} className="download-row" href={`/api/documents/${selected.id}/${kind}`}><FileText size={20}/><span><small>{kind==="cv"?"CV / RÉSUMÉ":"COVER LETTER"}</small>{name}</span><Download size={17}/></a>)}{selected.notes&&<><h3>Notes</h3><p className="notes">{selected.notes}</p></>}<div className="detail-bottom"><small>Added {new Date(selected.createdAt).toLocaleDateString("en-GB",{dateStyle:"long"})}</small><button className="delete-button" disabled={busy} onClick={()=>remove(selected)}><Trash2 size={14}/> Delete application</button></div></div></>}</dialog>{toast&&<div className="toast" role="status"><Check size={17}/>{toast}</div>}
  </div>;
 }
-function UploadField({label,file,onChange,existingName,removed,onRemove}:{label:string;file:File|null;onChange:(f:File|null)=>void;existingName?:string;removed?:boolean;onRemove?:()=>void}){const [error,setError]=useState("");return <div className="upload-field"><label>{label} <small>Optional</small></label>{existingName&&<div className="existing-document"><FileText size={14}/><span>{removed?"Will be removed":existingName}</span><button type="button" onClick={onRemove}>{removed?"Undo":"Remove"}</button></div>}<label className={"upload-box "+(file?"has-file":"")}><input type="file" accept=".pdf,.doc,.docx,.txt" onChange={e=>{const f=e.target.files?.[0]||null;if(f&&f.size>10*1024*1024){setError("Maximum file size is 10 MB.");e.target.value="";onChange(null);return;}setError("");onChange(f);}}/>{file?<FileText size={23}/>:<Upload size={23}/>}<strong>{file?file.name:existingName&&!removed?"Choose a replacement":"Choose a file"}</strong><small>{file?`${(file.size/1024).toFixed(0)} KB · Click to replace`:existingName&&!removed?"Current file is kept unless you replace it":"PDF, DOC, DOCX or TXT · up to 10 MB"}</small></label>{error&&<small className="field-error">{error}</small>}</div>;}
+function UploadField({label,file,onChange,existingName,removed,onRemove}:{label:string;file:File|null;onChange:(f:File|null)=>void;existingName?:string;removed?:boolean;onRemove?:()=>void}) {
+ const [error,setError]=useState("");
+ const input=useRef<HTMLInputElement>(null);
+ function clearSelected(){onChange(null);setError("");if(input.current)input.current.value="";}
+ return <div className="upload-field">
+  <label>{label} <small>Optional</small></label>
+  <label className={"upload-box "+(file?"has-file":"")}>
+   <input ref={input} aria-label={label} type="file" accept=".pdf,.doc,.docx,.txt" onChange={e=>{const f=e.target.files?.[0]||null;if(f&&f.size>10*1024*1024){setError("Maximum file size is 10 MB.");e.target.value="";onChange(null);return;}setError("");onChange(f);}}/>
+   <Upload size={23}/>
+   <strong>{file?"Choose another file":existingName&&!removed?"Choose a replacement":"Choose a file"}</strong>
+   <small>{file?"PDF, DOC, DOCX or TXT · up to 10 MB":existingName&&!removed?"Current file is kept unless you replace it":"PDF, DOC, DOCX or TXT · up to 10 MB"}</small>
+  </label>
+  {(file||existingName)&&<ul className="attachment-list" aria-label={label+" attachments"}><li className="existing-document">
+   <FileText size={14}/>
+   <span>{file?file.name:existingName}{!file&&removed&&<small> · Will be removed</small>}{file&&<small> · {(file.size/1024).toFixed(0)} KB</small>}</span>
+   <button type="button" onClick={file?clearSelected:onRemove}>{!file&&removed?"Undo":"Remove"}</button>
+  </li></ul>}
+  {error&&<small className="field-error">{error}</small>}
+ </div>;
+}
