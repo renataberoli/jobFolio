@@ -5,6 +5,15 @@ const anonymous=await fetch(base+'/api/applications');assert.equal(anonymous.sta
 const signin=await fetch(base+'/signin-with-chatgpt?return_to=/',{redirect:'manual'});const cookie=signin.headers.getSetCookie().map(s=>s.split(';')[0]).join('; ');assert.ok(cookie,'local sign-in cookie');
 const call=(path,options={})=>fetch(base+path,{...options,headers:{cookie,...options.headers}});
 const initial=await call('/api/applications');assert.equal(initial.status,200);
+for(const variant of ['blank','salary','cv-only','letter-only']){
+ const data=new FormData();if(variant==='salary')data.set('salary','€50,000');if(variant==='cv-only')data.set('cv',new File(['optional cv'],'cv.txt'));if(variant==='letter-only')data.set('letter',new File(['optional letter'],'letter.txt'));
+ const response=await call('/api/applications',{method:'POST',body:data});assert.equal(response.status,201,await response.clone().text());const {id}=await response.json();
+ try{const list=await (await call('/api/applications')).json();const item=list.applications.find(a=>a.id===id);assert.ok(item);assert.equal(item.role,'');assert.equal(item.company,'');assert.equal(item.url,'');assert.equal(Boolean(item.cvName),variant==='cv-only');assert.equal(Boolean(item.letterName),variant==='letter-only');
+ for(const kind of ['cv','letter']){const doc=await call(`/api/documents/${id}/${kind}`);assert.equal(doc.status,variant===kind+'-only'?200:404);}
+ }finally{assert.equal((await call('/api/applications',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})})).status,200);}
+}
+console.log('PASS: empty entry, salary-only entry, CV-only entry, and cover-letter-only entry.');
+const invalidUrl=new FormData();invalidUrl.set('url','javascript:alert(1)');assert.equal((await call('/api/applications',{method:'POST',body:invalidUrl})).status,400);
 const body=new FormData();for(const [k,v] of Object.entries({role:'Smoke test role',company:'Test company',url:'https://example.com/job',salary:'€60,000 / year',notes:'Disposable local test'}))body.set(k,v);
 body.set('cv',new File(['test cv document'],'cv.txt',{type:'text/plain'}));body.set('letter',new File(['test cover letter'],'letter.txt',{type:'text/plain'}));
 const saved=await call('/api/applications',{method:'POST',body});assert.equal(saved.status,201,await saved.clone().text());const {id}=await saved.json();
