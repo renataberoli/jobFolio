@@ -8,6 +8,13 @@
       "when": 1794060621985,
       "tag": "0000_nasty_kylun",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795461665997,
+      "tag": "0001_naive_molten_man",
+      "breakpoints": true
     }
   ]
 }

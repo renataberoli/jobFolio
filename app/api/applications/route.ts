@@ -3,7 +3,8 @@ import { getChatGPTUser } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
 import { applications } from "../../../db/schema";
 import { and, eq, desc } from "drizzle-orm";
-const statuses = ["Saved", "Applied", "Interview", "Offer", "Closed"];
+import { applicationMethodError, getApplicationMethods } from "../../../lib/application-methods";
+import { applicationStatuses as statuses } from "../../../lib/application-statuses";
 const error = (message: string, status = 400) => Response.json({error:message}, {status});
 function sameOrigin(request: Request) { const origin = request.headers.get("origin"); return !origin || origin === new URL(request.url).origin; }
 export async function GET() {
@@ -19,6 +20,8 @@ async function saveApplication(request: Request, editing: boolean) {
  const keys:string[]=[];
  try {
  const form=await request.formData(); const field=(key:string)=>String(form.get(key)||"").trim();
+ const methods=getApplicationMethods(form);
+ if(!methods.easyApply&&!methods.manuallyApplied)return error(applicationMethodError);
  const id=editing?field("id"):crypto.randomUUID();
  const [existing]=editing?await getDb().select().from(applications).where(and(eq(applications.id,id),eq(applications.owner,user.userId))):[];
  if(editing&&!existing)return error("Application not found.",404);
@@ -33,7 +36,7 @@ async function saveApplication(request: Request, editing: boolean) {
  const cvKey=cvFile?user.userId+"/"+id+"/cv/"+crypto.randomUUID():(field("removeCv")==="true"?"":existing?.cvKey||"");
  const letterKey=letterFile?user.userId+"/"+id+"/letter/"+crypto.randomUUID():(field("removeLetter")==="true"?"":existing?.letterKey||"");
  for(const [key,file] of [[cvKey,cvFile],[letterKey,letterFile]] as const) { if(!file)continue; keys.push(key); await env.BUCKET!.put(key,file.stream(),{httpMetadata:{contentType:"application/octet-stream"}}); }
- const values={role,company,url,salary:salary||null,notes:notes||null,status,cvKey,cvName:cvFile?.name||(cvKey?existing?.cvName||"":""),letterKey,letterName:letterFile?.name||(letterKey?existing?.letterName||"":"")};
+ const values={...methods,role,company,url,salary:salary||null,notes:notes||null,status,cvKey,cvName:cvFile?.name||(cvKey?existing?.cvName||"":""),letterKey,letterName:letterFile?.name||(letterKey?existing?.letterName||"":"")};
  if(editing){
  const result=await getDb().update(applications).set(values).where(and(eq(applications.id,id),eq(applications.owner,user.userId))).returning({id:applications.id});
  if(!result.length){if(env.BUCKET)await Promise.allSettled(keys.map(key=>env.BUCKET!.delete(key)));return error("Application not found.",404);}
