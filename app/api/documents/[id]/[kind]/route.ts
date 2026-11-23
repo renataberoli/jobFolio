@@ -1,10 +1,10 @@
 import {env} from "cloudflare:workers";
-import {getChatGPTUser} from "../../../../chatgpt-auth";
+import {getAppUser} from "../../../../profile-auth";
 import {getDb} from "../../../../../db";
 import {applications} from "../../../../../db/schema";
 import {and,eq} from "drizzle-orm";
 export async function GET(request:Request,context:{params:Promise<{id:string;kind:string}>}) {
- const user=await getChatGPTUser();if(!user)return new Response("Please sign in",{status:401});
+ const user=await getAppUser();if(!user)return new Response("Choose a profile to continue",{status:401,headers:{"Cache-Control":"no-store"}});
  const {id,kind}=await context.params;if(!["cv","letter"].includes(kind))return new Response("Not found",{status:404});
  const [item]=await getDb().select().from(applications).where(and(eq(applications.id,id),eq(applications.owner,user.userId)));if(!item)return new Response("Not found",{status:404});
  const key=kind==="cv"?item.cvKey:item.letterKey;if(!key)return new Response("File not found",{status:404});

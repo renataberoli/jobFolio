@@ -1,21 +1,20 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser } from "../../chatgpt-auth";
+import { getAppUser, sameOrigin } from "../../profile-auth";
 import { getDb } from "../../../db";
 import { applications } from "../../../db/schema";
 import { and, eq, desc } from "drizzle-orm";
 import { applicationMethodError, getApplicationMethods } from "../../../lib/application-methods";
 import { applicationStatuses as statuses } from "../../../lib/application-statuses";
 const error = (message: string, status = 400) => Response.json({error:message}, {status});
-function sameOrigin(request: Request) { const origin = request.headers.get("origin"); return !origin || origin === new URL(request.url).origin; }
 export async function GET() {
- const user = await getChatGPTUser(); if (!user) return error("Please sign in to see your applications.",401);
+ const user = await getAppUser(); if (!user) return error("Choose a profile to see your applications.",401);
  try { const items = await getDb().select().from(applications).where(eq(applications.owner,user.userId)).orderBy(desc(applications.createdAt)); return Response.json({applications:items.map(({owner,cvKey,letterKey,...item})=>item)}, {headers:{"Cache-Control":"no-store"}}); } catch { return error("Your applications could not be loaded. Please try again.",500); }
 }
 export async function POST(request: Request) { return saveApplication(request, false); }
 export async function PUT(request: Request) { return saveApplication(request, true); }
 async function saveApplication(request: Request, editing: boolean) {
  if (!sameOrigin(request)) return error("Invalid origin",403);
- const user=await getChatGPTUser(); if(!user) return error("Please sign in before saving.",401);
+ const user=await getAppUser(); if(!user) return error("Choose a profile before saving.",401);
  if(Number(request.headers.get("content-length"))>22*1024*1024) return error("Each document must be 10 MB or smaller.",413);
  const keys:string[]=[];
  try {
@@ -48,7 +47,7 @@ async function saveApplication(request: Request, editing: boolean) {
 }
 export async function PATCH(request: Request) {
  if(!sameOrigin(request)) return error("Invalid origin",403);
- const user=await getChatGPTUser(); if(!user) return error("Sign in first.",401);
+ const user=await getAppUser(); if(!user) return error("Choose a profile first.",401);
  try { const {id,status}=await request.json() as {id?:unknown;status?:unknown}; if(typeof id!=="string"||typeof status!=="string"||!statuses.includes(status))return error("Invalid status.");
  const result=await getDb().update(applications).set({status}).where(and(eq(applications.id,id),eq(applications.owner,user.userId))).returning({id:applications.id});
  return result.length?Response.json({ok:true}):error("Application not found.",404);
@@ -56,7 +55,7 @@ export async function PATCH(request: Request) {
 }
 export async function DELETE(request: Request) {
  if(!sameOrigin(request))return error("Invalid origin",403);
- const user=await getChatGPTUser();if(!user)return error("Sign in first.",401);
+ const user=await getAppUser();if(!user)return error("Choose a profile first.",401);
  try { const {id}=await request.json() as {id?:unknown}; if(typeof id!=="string")return error("Invalid application."); const [item]=await getDb().select().from(applications).where(and(eq(applications.id,id),eq(applications.owner,user.userId)));if(!item)return error("Application not found.",404);
  const fileKeys=[item.cvKey,item.letterKey].filter(Boolean);if(fileKeys.length){if(!env.BUCKET)throw Error();await env.BUCKET.delete(fileKeys);}await getDb().delete(applications).where(and(eq(applications.id,id),eq(applications.owner,user.userId)));return Response.json({ok:true});
  }catch{return error("Could not delete this application. Please retry.",500);}
