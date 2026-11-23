@@ -146,3 +146,24 @@ dialog{background:var(--white)}dialog::backdrop{background:#45363E69}
 .navbar-brand{display:inline-flex;align-items:center;gap:10px;color:var(--ink);font-size:22px;font-weight:650;letter-spacing:-.8px;line-height:1;text-decoration:none;flex-shrink:0}
 .navbar-brand img{display:block;width:40px;height:40px;flex-shrink:0}
 @media(max-width:760px){.navbar-brand{gap:8px;font-size:20px}.navbar-brand img{width:34px;height:34px}}
+
+/* Keep table status labels and chevrons aligned inside each control. */
+.applications .status{
+ appearance:none;
+ -webkit-appearance:none;
+ box-sizing:border-box;
+ width:128px;
+ max-width:none;
+ min-height:34px;
+ padding:8px 36px 8px 12px;
+ line-height:18px;
+ text-align:left;
+ vertical-align:middle;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%2345363E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+ background-repeat:no-repeat;
+ background-position:right 12px center;
+ background-size:14px 14px;
+}
+.applications .status-offer{
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%23FFFFFF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
