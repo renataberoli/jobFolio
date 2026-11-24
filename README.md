@@ -11,11 +11,12 @@ A simple workspace for your job search. Keep opportunities, application progress
 - **Track applications:** organize roles by Saved, Applied, Interview, Offer, Rejected, or Closed.
 - **See your progress:** view today's applications, this week's entries, interviews, and rejections, with Easy apply and Manually applied breakdowns.
 - **Keep documents together:** attach a CV and cover letter to each opportunity, then download, replace, or remove them later.
+- **Manage your profile:** click your username or avatar to change its name, download your applications as CSV, or delete the profile after confirmation.
 - **Find and update entries:** search by role, company, or notes; filter by status; edit details; or mark an application as rejected from its row.
 
 ## How to use
 
-1. **Enter the shared PIN**, then choose a profile or create one. Use the profile control in the navbar to switch profiles, or the sign-out icon to leave.
+1. **Enter the shared PIN**, then choose a profile or create one. Click your username or avatar in the navbar to manage your profile; use **Switch profile** on that page to choose another, or the sign-out icon to leave.
 2. **Click New application.** Select **Easy apply**, **Manually applied**, or both. At least one is required; the remaining fields are optional.
 3. **Add the opportunity details:** job title, company, job link, salary expectation, and notes. Attach documents if needed, then click **Save application**. New entries start as **Saved**.
 4. **Update the status** as things progress using the status selector. The circled cross in the last column marks an entry as **Rejected**.
